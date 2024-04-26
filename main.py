@@ -1,5 +1,7 @@
 import json
+import pprint
 import sys
+import time
 import rsakeys
 import base64
 import os.path
@@ -11,7 +13,7 @@ def assign_task(command, additional=""):
     elif command == "add":
         add(additional)
     elif command == "show":
-        show()
+        show(additional)
     elif command == "remove":
         remove()
     elif command == "genkeys":
@@ -26,7 +28,7 @@ def assign_task(command, additional=""):
     return
 
 def add(accountName=""):
-    (pubkey, privkey) = rsakeys.fetchKeys()
+    (pubkey, _) = rsakeys.fetchKeys()
     if accountName == "":
         accountName = input("Enter The Account Name: ")
 
@@ -46,8 +48,37 @@ def add(accountName=""):
     # print(accounts)
     return
 
-def show():
-    print(accounts)
+def show(name=""):
+    (_, pubkey) = rsakeys.fetchKeys()
+    showAccounts = {}
+    for k,v in accounts.items():
+        account, password = k, rsakeys.decrypt(base64.b64decode(v), pubkey).decode("utf-8")
+        showAccounts[account] = password
+    
+    if name == "all":
+        pprint.pprint(showAccounts)
+    else:
+        if not name:
+            accountName = input("Enter Account: ")
+        else:
+            accountName = name
+
+        if accountName not in showAccounts:
+            message = input("Account not found. Add a new account with that name? [Y]/[N]? ")
+            if message.upper() == "Y":
+                add(name)
+                return
+        else:
+            print(accountName, showAccounts[accountName])
+
+    for i in range(5, 0, -1):
+        print(f"clearing screen in {i} seconds.", end="\r")
+        time.sleep(1)
+    if os.name == 'nt':
+        _ = os.system('cls')
+    # For UNIX-like systems (Linux, macOS)
+    else:
+        _ = os.system('clear')
     return
 
 def help():

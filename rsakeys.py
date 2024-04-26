@@ -29,5 +29,5 @@ def fetchKeys():
 def encrypt(data, pubkey):
     return rsa.encrypt(data, pubkey)
 
-def decode(data, privkey):
+def decrypt(data, privkey):
     return rsa.decrypt(data, privkey)
