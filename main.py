@@ -3,6 +3,7 @@ import sys
 import rsakeys
 import base64
 import os.path
+import getpass
 
 def assign_task(command, additional=""):
     if command == "help":
@@ -13,6 +14,15 @@ def assign_task(command, additional=""):
         show()
     elif command == "remove":
         remove()
+    elif command == "genkeys":
+        if os.path.isfile("keys.json"):
+            message = input("Keys have already been generated before. Overriding it will make the already stored passwords irrecoverable. Confirm? [Y]/[N]? ")
+            if message.upper() == "Y":
+                rsakeys.generateKeys()
+    elif command == "keys":
+        (pub, priv) = rsakeys.fetchKeys()
+        print(pub, priv)
+
     return
 
 def add(accountName=""):
@@ -20,16 +30,20 @@ def add(accountName=""):
     if accountName == "":
         accountName = input("Enter The Account Name: ")
 
-    if accountName in accounts:
+    if accounts.get(accountName) is not None:
         message = input("Password for this account is already entered. Overrite? This cannot be undone. [Y]/[N]? ")
-        if message.upper() == "Y":
-            password = input("Enter Password: ").encode("utf-8")
-            encyrptedPW = rsakeys.encrypt(password, pubkey)
-            accounts[accountName] = base64.b64encode(encyrptedPW).decode("utf-8")
-            with open("accountinfo.json", "w") as f:
-                json.dump(accounts, f)
+        if message.upper() == "N":
+            return
+        
+    password = getpass.getpass("Enter Password: ").encode("utf-8")
+    encyrptedPW = rsakeys.encrypt(password, pubkey)
+    accounts[accountName] = base64.b64encode(encyrptedPW).decode("utf-8")
+    try:
+        with open("accountinfo.json", "w") as f:
+            json.dump(accounts, f)
+    except Exception as e:
+        print("An error occurred while writing to the file:", e)
     # print(accounts)
-
     return
 
 def show():
@@ -45,12 +59,11 @@ def remove():
 
 n = len(sys.argv)
 
-arguments = ("help", "add", "show", "remove")
+arguments = ("help", "add", "show", "remove", "keys", "genkeys")
 
 if os.path.isfile("accountinfo.json"):
-        # Read existing data from the JSON file
-        with open("accountinfo.json", "r") as f:
-            accounts = json.load(f)
+    with open("accountinfo.json", "r") as f:
+        accounts = json.load(f)
 else:
     accounts = {}
 
