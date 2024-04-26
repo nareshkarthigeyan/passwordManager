@@ -52,8 +52,12 @@ def show(name=""):
     (_, pubkey) = rsakeys.fetchKeys()
     showAccounts = {}
     for k,v in accounts.items():
-        account, password = k, rsakeys.decrypt(base64.b64decode(v), pubkey).decode("utf-8")
-        showAccounts[account] = password
+        try:
+            account, password = k, rsakeys.decrypt(base64.b64decode(v), pubkey).decode("utf-8")
+            showAccounts[account] = password
+        except Exception as e:
+            print("An error occured. Error:", e, "Have you changed the keys?")
+            return
     
     if name == "all":
         pprint.pprint(showAccounts)

@@ -30,4 +30,8 @@ def encrypt(data, pubkey):
     return rsa.encrypt(data, pubkey)
 
 def decrypt(data, privkey):
-    return rsa.decrypt(data, privkey)
+    try: 
+        return rsa.decrypt(data, privkey)
+    except rsa.pkcs1.DecryptionError:
+        print("Decryption Error. Did you change the keys?")
+        return
