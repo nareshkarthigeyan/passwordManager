@@ -3,25 +3,63 @@ import pprint
 import random
 import sys
 import time
-import rsakeys
 import base64
 import os.path
 import getpass
 from tabulate import tabulate
+import json
+import rsa
+
+def generateKeys():
+    (pubkey, privkey) = rsa.newkeys(512)
+    keyData = {
+        "public_key": pubkey.save_pkcs1().decode(),
+        "private_key": privkey.save_pkcs1().decode()
+    }
+
+    with open("keys.json", 'w') as f:
+        json.dump(keyData, f)
+
+
+def fetchKeys():
+    while True:
+        try:
+            with open("keys.json", "r") as f:
+                keyData = json.load(f)
+                pubkey = rsa.PublicKey.load_pkcs1(keyData['public_key'].encode())
+                privkey = rsa.PrivateKey.load_pkcs1(keyData['private_key'].encode())
+                return pubkey, privkey
+        except FileNotFoundError:
+            print("No Keys Found. Generating Keys. Please wait...")
+            generateKeys()
+        
+    
+(pubkey, privkey) = fetchKeys()
+
+def encrypt(data, pubkey):
+    return rsa.encrypt(data, pubkey)
+
+def decrypt(data, privkey):
+    try: 
+        return rsa.decrypt(data, privkey)
+    except rsa.pkcs1.DecryptionError:
+        print("Decryption Error. Did you change the keys?")
+        return
+
 
 def refreshkeys():
     tempAccounts = {}
-    (pubkey, privkey) = rsakeys.fetchKeys()
+    (pubkey, privkey) = fetchKeys()
     for k,v in accounts.items():
-        account, password = k, rsakeys.decrypt(base64.b64decode(v), privkey).decode("utf-8")
+        account, password = k, decrypt(base64.b64decode(v), privkey).decode("utf-8")
         tempAccounts[account] = password
 
-    rsakeys.generateKeys()
-    (pubkey, privkey) = rsakeys.fetchKeys()
+    generateKeys()
+    (pubkey, privkey) = fetchKeys()
 
     try:
         for account, password in tempAccounts.items():
-            encyrptedPW = rsakeys.encrypt(password.encode("utf-8"), pubkey)
+            encyrptedPW = encrypt(password.encode("utf-8"), pubkey)
             tempAccounts[account] = base64.b64encode(encyrptedPW).decode("utf-8")
 
         with open("accountinfo.json", "w") as f:
@@ -43,13 +81,13 @@ def assign_task(command, additional="", additional2=""):
     elif command == "refresh":
         refreshkeys()
     elif command == "keys":
-        (pub, priv) = rsakeys.fetchKeys()
+        (pub, priv) = fetchKeys()
         print(pub, priv)
 
     return
 
 def add(accountName="", password=""):
-    (pubkey, privkey) = rsakeys.fetchKeys()
+    (pubkey, privkey) = fetchKeys()
     if not accountName:
         accountName = input("Enter The Account Name: ")
 
@@ -63,7 +101,7 @@ def add(accountName="", password=""):
     else:
         password = password.encode("utf-8")
 
-    encyrptedPW = rsakeys.encrypt(password, pubkey)
+    encyrptedPW = encrypt(password, pubkey)
     accounts[accountName] = base64.b64encode(encyrptedPW).decode("utf-8")
     try:
         with open("accountinfo.json", "w") as f:
@@ -74,11 +112,11 @@ def add(accountName="", password=""):
     return
 
 def show(name=""):
-    (pubkey, privkey) = rsakeys.fetchKeys()
+    (pubkey, privkey) = fetchKeys()
     showAccounts = {}
     for k,v in accounts.items():
         try:
-            account, password = k, rsakeys.decrypt(base64.b64decode(v), privkey).decode("utf-8")
+            account, password = k, decrypt(base64.b64decode(v), privkey).decode("utf-8")
             showAccounts[account] = password
         except Exception as e:
             print("An error occured. Error:", e, "Have you changed the keys?")
