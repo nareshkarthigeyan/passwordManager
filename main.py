@@ -1,5 +1,6 @@
 import json
 import pprint
+import random
 import sys
 import time
 import rsakeys
@@ -9,13 +10,13 @@ import getpass
 
 def refreshkeys():
     tempAccounts = {}
-    (_, pubkey) = rsakeys.fetchKeys()
+    (pubkey, privkey) = rsakeys.fetchKeys()
     for k,v in accounts.items():
-        account, password = k, rsakeys.decrypt(base64.b64decode(v), pubkey).decode("utf-8")
+        account, password = k, rsakeys.decrypt(base64.b64decode(v), privkey).decode("utf-8")
         tempAccounts[account] = password
 
     rsakeys.generateKeys()
-    (_, pubkey) = rsakeys.fetchKeys()
+    (pubkey, privkey) = rsakeys.fetchKeys()
 
     try:
         for account, password in tempAccounts.items():
@@ -35,9 +36,10 @@ def assign_task(command, additional=""):
         add(additional)
     elif command == "show":
         show(additional)
+        refreshkeys()
     elif command == "remove":
         remove()
-    elif command == "genkeys":
+    elif command == "refresh":
         refreshkeys()
     elif command == "keys":
         (pub, priv) = rsakeys.fetchKeys()
@@ -67,11 +69,11 @@ def add(accountName=""):
     return
 
 def show(name=""):
-    (_, pubkey) = rsakeys.fetchKeys()
+    (pubkey, privkey) = rsakeys.fetchKeys()
     showAccounts = {}
     for k,v in accounts.items():
         try:
-            account, password = k, rsakeys.decrypt(base64.b64decode(v), pubkey).decode("utf-8")
+            account, password = k, rsakeys.decrypt(base64.b64decode(v), privkey).decode("utf-8")
             showAccounts[account] = password
         except Exception as e:
             print("An error occured. Error:", e, "Have you changed the keys?")
@@ -112,7 +114,7 @@ def remove():
 
 n = len(sys.argv)
 
-arguments = ("help", "add", "show", "remove", "keys", "genkeys")
+arguments = ("help", "add", "show", "remove", "keys", "refresh")
 
 if os.path.isfile("accountinfo.json"):
     with open("accountinfo.json", "r") as f:
