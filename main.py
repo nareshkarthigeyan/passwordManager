@@ -7,6 +7,7 @@ import rsakeys
 import base64
 import os.path
 import getpass
+from tabulate import tabulate
 
 def refreshkeys():
     tempAccounts = {}
@@ -29,11 +30,11 @@ def refreshkeys():
         print("An error occurred while writing to the file:", e)
         
 
-def assign_task(command, additional=""):
+def assign_task(command, additional="", additional2=""):
     if command == "help":
         help()
     elif command == "add":
-        add(additional)
+        add(additional, additional2)
     elif command == "show":
         show(additional)
         refreshkeys()
@@ -47,7 +48,7 @@ def assign_task(command, additional=""):
 
     return
 
-def add(accountName=""):
+def add(accountName="", password=""):
     (pubkey, privkey) = rsakeys.fetchKeys()
     if not accountName:
         accountName = input("Enter The Account Name: ")
@@ -57,7 +58,11 @@ def add(accountName=""):
         if message.upper() == "N":
             return
         
-    password = getpass.getpass("Enter Password: ").encode("utf-8")
+    if not password:        
+        password = getpass.getpass("Enter Password: ").encode("utf-8")
+    else:
+        password = password.encode("utf-8")
+
     encyrptedPW = rsakeys.encrypt(password, pubkey)
     accounts[accountName] = base64.b64encode(encyrptedPW).decode("utf-8")
     try:
@@ -80,7 +85,12 @@ def show(name=""):
             return
     
     if name == "all":
-        pprint.pprint(showAccounts)
+        # pprint.pprint(showAccounts)
+        table_data = [(key, value) for key, value in showAccounts.items()]
+        table = tabulate(table_data, headers=["Account", "Password"], tablefmt="github")
+        print(table)
+        print(" ")
+
     else:
         if not name:
             accountName = input("Enter Account: ")
@@ -91,9 +101,12 @@ def show(name=""):
             message = input("Account not found. Add a new account with that name? [Y]/[N]? ")
             if message.upper() == "Y":
                 add(name)
-                return
+            return
         else:
-            print(accountName, showAccounts[accountName])
+            table_data = [(accountName, showAccounts[accountName])]
+            table = tabulate(table_data, headers=["Account", "Password"], tablefmt="github")
+            print(table)
+            print(" ")
 
     for i in range(5, 0, -1):
         print(f"clearing screen in {i} seconds.", end="\r")
@@ -131,4 +144,6 @@ if n == 2:
     assign_task(sys.argv[1])
 elif n == 3:
     assign_task(sys.argv[1], sys.argv[2])
+elif n == 4:
+    assign_task(sys.argv[1], sys.argv[2], sys.argv[3])
 
