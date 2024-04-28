@@ -59,7 +59,7 @@ def add(accountName="", password=""):
             return
         
     if not password:        
-        password = getpass.getpass("Enter Password: ").encode("utf-8")
+        password = getpass.getpass(f"Enter Password for {accountName}: ").encode("utf-8")
     else:
         password = password.encode("utf-8")
 
@@ -119,7 +119,33 @@ def show(name=""):
     return
 
 def help():
-    pass
+    help_message = """
+Passman - Password Manager
+
+Usage:
+    passman command
+
+Commands:
+    add          Add a new account
+    show         Show account information
+    refresh      Refresh account information
+    help         Show this help message
+
+Examples:
+    passman add Google                # Add a new account named "Google"
+    passman add Facebook password     # Add a new account named "Facebook" with password "password"
+    passman show all                       # Show all accounts
+    passman show Google               # Show account information for "Google"
+    passman refresh                     # Refresh account information
+
+For more information, visit: https://github.com/nareshkarthigeyan/passwordManager
+
+Note:
+    - Passwords are encrypted at all times.
+    - Passwords will disappear from the screen after 5 seconds.
+"""
+    print(help_message)
+    return
 
 def remove():
     pass
