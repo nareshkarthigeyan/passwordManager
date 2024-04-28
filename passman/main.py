@@ -9,7 +9,6 @@ import json
 import rsa
 
 def main():
-
     def generateKeys():
         (pubkey, privkey) = rsa.newkeys(512)
         keyData = {
@@ -68,7 +67,7 @@ def main():
             print("An error occurred while writing to the file:", e)
             
 
-    def assign_task(command, additional="", additional2=""):
+    def assign_task(command, additional="", additional2="", additonal3=""):
         if command == "help":
             help()
         elif command == "add":
@@ -77,7 +76,7 @@ def main():
             show(additional)
             refreshkeys()
         elif command == "remove":
-            remove()
+            remove(additional)
         elif command == "refresh":
             refreshkeys()
         elif command == "keys":
@@ -185,8 +184,20 @@ def main():
         print(help_message)
         return
 
-    def remove():
-        pass
+    def remove(alll=""):
+        message = input("This process is irreversible. Continue? [Y]/[N]: ")
+        if message.upper() == "Y":
+            if alll == "all":
+                with open("accountinfo.json", 'w') as json_file:
+                    # Write an empty JSON object to the file
+                    json.dump({}, json_file)
+            if not all:
+                alll = input("Enter Account Name: ")
+            if alll in accounts:
+                accounts.pop(alll)
+                with open("accountinfo.json", "w") as f:
+                    json.dump(accounts, f)            
+        return
 
 
     n = len(sys.argv)
@@ -199,8 +210,10 @@ def main():
     else:
         accounts = {}
 
+    appname = "passman"
+
     if n < 2:
-        print("Usage: appname.py command. Use appname.py help for more info.")
+        print(f"Usage: {appname} command. Use {appname} help for more info.")
     elif sys.argv[1] not in arguments:
         print("No use for the command {", sys.argv[1], "} found. Try using appname.py help.")
 
@@ -210,4 +223,3 @@ def main():
         assign_task(sys.argv[1], sys.argv[2])
     elif n == 4:
         assign_task(sys.argv[1], sys.argv[2], sys.argv[3])
-
