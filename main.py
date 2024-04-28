@@ -7,6 +7,27 @@ import base64
 import os.path
 import getpass
 
+def refreshkeys():
+    tempAccounts = {}
+    (_, pubkey) = rsakeys.fetchKeys()
+    for k,v in accounts.items():
+        account, password = k, rsakeys.decrypt(base64.b64decode(v), pubkey).decode("utf-8")
+        tempAccounts[account] = password
+
+    rsakeys.generateKeys()
+    (_, pubkey) = rsakeys.fetchKeys()
+
+    try:
+        for account, password in tempAccounts.items():
+            encyrptedPW = rsakeys.encrypt(password.encode("utf-8"), pubkey)
+            tempAccounts[account] = base64.b64encode(encyrptedPW).decode("utf-8")
+
+        with open("accountinfo.json", "w") as f:
+            json.dump(tempAccounts, f)
+    except Exception as e:
+        print("An error occurred while writing to the file:", e)
+        
+
 def assign_task(command, additional=""):
     if command == "help":
         help()
@@ -17,10 +38,7 @@ def assign_task(command, additional=""):
     elif command == "remove":
         remove()
     elif command == "genkeys":
-        if os.path.isfile("keys.json"):
-            message = input("Keys have already been generated before. Overriding it will make the already stored passwords irrecoverable. Confirm? [Y]/[N]? ")
-            if message.upper() == "Y":
-                rsakeys.generateKeys()
+        refreshkeys()
     elif command == "keys":
         (pub, priv) = rsakeys.fetchKeys()
         print(pub, priv)
@@ -28,8 +46,8 @@ def assign_task(command, additional=""):
     return
 
 def add(accountName=""):
-    (pubkey, _) = rsakeys.fetchKeys()
-    if accountName == "":
+    (pubkey, privkey) = rsakeys.fetchKeys()
+    if not accountName:
         accountName = input("Enter The Account Name: ")
 
     if accounts.get(accountName) is not None:

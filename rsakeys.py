@@ -21,6 +21,7 @@ def fetchKeys():
                 privkey = rsa.PrivateKey.load_pkcs1(keyData['private_key'].encode())
                 return pubkey, privkey
         except FileNotFoundError:
+            print("No Keys Found. Generating Keys. Please wait...")
             generateKeys()
         
     
