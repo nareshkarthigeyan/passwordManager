@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='passman',
-    version='0.0.1',
+    name='psgr',
+    version='0.1.0',
     description='A password manager application',
     author='Naresh Karthigeyan',
     author_email='nareskarthigeyan.2005@gmail.com',
