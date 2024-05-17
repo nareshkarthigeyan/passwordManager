@@ -8,8 +8,12 @@ from tabulate import tabulate
 import json
 import rsa
 from InquirerPy import inquirer
+import signal
+
+
 
 def main():
+
     def generateKeys():
         (pubkey, privkey) = rsa.newkeys(512)
         keyData = {
@@ -157,9 +161,14 @@ def main():
                 print(table)
                 print(" ")
 
+        def ignore_ctrl_c(signum, frame):
+            print("Ctrl+C is disabled.", end="\r")
+        original_handler = signal.getsignal(signal.SIGINT)
+        signal.signal(signal.SIGINT, ignore_ctrl_c)
         for i in range(5, 0, -1):
             print(f"clearing screen in {i} seconds.", end="\r")
             time.sleep(1)
+        signal.signal(signal.SIGINT, original_handler)
         if os.name == 'nt':
             _ = os.system('cls')
         # For UNIX-like systems (Linux, macOS)
@@ -197,7 +206,10 @@ def main():
         return
 
     def remove(alll=""):
-        message = input("This process is irreversible. Continue? [Y]/[N]: ")
+        message = inquirer.select(
+                    message = "Choose Account:",
+                    choices = ['Y', 'N']
+                ).execute()
         if message.upper() == "Y":
             if alll == "all":
                 with open("accountinfo.json", 'w') as json_file:
