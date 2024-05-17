@@ -87,6 +87,8 @@ def main():
         elif command == "keys":
             (pub, priv) = fetchKeys()
             print(pub, priv)
+        elif command == "genkeys":
+            generateKeys()
 
         return
 
@@ -101,7 +103,7 @@ def main():
                 return
             
         if not password:        
-            password = getpass.getpass(f"Enter Password for {accountName}: ").encode("utf-8")
+            password = getpass.getpass(f"Enter Password for {accountName}: ", stream=sys.stderr).encode("utf-8")
         else:
             password = password.encode("utf-8")
 
@@ -145,7 +147,7 @@ def main():
                     chooseIt.append(k)
                 accountName = inquirer.select(
                     message = "Choose the account:",
-                    choices = chooseIt.append()
+                    choices = chooseIt
                 ).execute()
             else:
                 accountName = name
@@ -162,7 +164,14 @@ def main():
                 print(" ")
 
         def ignore_ctrl_c(signum, frame):
-            print("Ctrl+C is disabled.", end="\r")
+            if os.name == 'nt':
+                _ = os.system('cls')
+            # For UNIX-like systems (Linux, macOS)
+            else:
+                _ = os.system('clear')
+
+            sys.exit(0)
+        
         original_handler = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, ignore_ctrl_c)
         for i in range(5, 0, -1):
@@ -233,7 +242,7 @@ def main():
 
     n = len(sys.argv)
 
-    arguments = ("help", "add", "show", "remove", "keys", "refresh")
+    arguments = ("help", "add", "show", "remove", "keys", "refresh", "genkeys")
 
     if os.path.isfile("accountinfo.json"):
         with open("accountinfo.json", "r") as f:
