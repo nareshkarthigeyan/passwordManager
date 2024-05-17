@@ -1,9 +1,0 @@
-setup.py
-passman/__init__.py
-passman/main.py
-passman.egg-info/PKG-INFO
-passman.egg-info/SOURCES.txt
-passman.egg-info/dependency_links.txt
-passman.egg-info/entry_points.txt
-passman.egg-info/requires.txt
-passman.egg-info/top_level.txt

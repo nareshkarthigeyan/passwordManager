@@ -145,7 +145,7 @@ def main():
                     chooseIt.append(k)
                 accountName = inquirer.select(
                     message = "Choose the account:",
-                    choices = chooseIt
+                    choices = chooseIt.append()
                 ).execute()
             else:
                 accountName = name

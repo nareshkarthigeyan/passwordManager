@@ -1,2 +1,0 @@
-[console_scripts]
-passman = passman.main:main
