@@ -91,6 +91,8 @@ def main():
                 generateKeys()
             elif command in ["genpass", "-p"]:
                 passwordGen()
+            elif command in ["usergen", "-u"]:
+                createUser()
 
             return
 
@@ -203,7 +205,8 @@ def main():
             remove       Remove an account
             genpass      Create and generate a strong password of the length of your choice
             keys         View your current RSA encryption keys protecting your passwords
-            genkeys      Generate new keys. 
+            genkeys      Generate new keys.
+            usergen      Creates a new user information overriding the old one. This data is used during passoword generation.
             help         Show this help message
 
         Alternate Commands for Ease of Use:
@@ -229,6 +232,7 @@ def main():
             passman -r
             passman remove Google               # Removes Google
             passman -rm Google
+            passman -u
 
         For more information and source code, visit: https://github.com/nareshkarthigeyan/passwordManager
 
@@ -266,25 +270,59 @@ def main():
                         json.dump(accounts, f)            
             return
         
-        def genpass(length):
-            digits = [x for x in "0123456789"]
-            lowercase = [x for x in "abcdefghijklmnopqrstuvwxyz"]
-            uppercase = [x for x in "abcdefghijklmnopqrstuvwxyz".upper()]
-            special = [x for x in "!@#$%^&*()_+~|}{:'?><" +'"']
-            combinedList = digits + lowercase + uppercase + special
+        def genpass(length, personalized):
+            digits = "0123456789"
+            lowercase = "abcdefghijklmnopqrstuvwxyz"
+            uppercase = "abcdefghijklmnopqrstuvwxyz".upper()
+            special = "!@#$%^&*()_+~|}{:'?><" +'"'
+            combinedList = list(digits + lowercase + uppercase + special)
+            userSpecific = ""
+            if personalized == "yes":
+                try: 
+                    with open("userinfo.json") as f:
+                        userinfoDic = json.load(f)
+                        userinfoRaw = list(userinfoDic.values())
+                        userinfo = [x for x in userinfoRaw if x != ""]
+                        random.shuffle(userinfo)
+                    ran = random.choice(userinfo).replace(" ", "")
+                    print(ran)
+                    randomIndex = random.randint(len(ran)//3, len(ran))
+                    ran2 = random.choice([ran[:randomIndex], ran[randomIndex:]])
+                    print(ran2)
+                    for i in ran2:
+                        userSpecific += random.choice([i.upper(), i.lower()])
+                    print(userSpecific)
+                except FileNotFoundError:
+                    answer = inquirer.select(
+                        message = "No user data detected. Add user data now?",
+                        choices = ["yes", "no"]
+                    ).execute() 
+                    if answer == "yes":
+                        createUser()
+                        print("User info created successfully. Run the command again to generate a personalized password.")
+                        sys.exit(0)
+                    elif answer == "no":
+                        userSpecific = ""
 
-            password = "" + random.choice(uppercase) + random.choice(lowercase) + random.choice(special)
-            for i in range (length - 3):
-                password += random.choice(combinedList)
-
+            passwordList = [random.choice(uppercase)] + [random.choice(lowercase)] + [random.choice(special)] + [random.choice(digits)] + [userSpecific]
+            lengthDone = len("".join(passwordList))
+            for i in range (length - lengthDone):
+                passwordList.append(random.choice(combinedList))
+            random.shuffle(passwordList)
+            password = "".join(passwordList)
             return password
         
         def passwordGen():
-            length = inquirer.select(
-                        message = "Choose Length of Password to be generated:",
-                        choices = [12, 16, 24]
+            type = inquirer.select(
+                        message = "Do you want to personalize your Password with your info?",
+                        choices = ["yes", "no"]
                     ).execute()
-            password = genpass(length=length)
+            length = inquirer.select(
+                        message = "Choose desired characted length of the Password:",
+                        choices = [8, 16, 24]
+                    ).execute()
+            password = genpass(length=length, personalized=type)
+            print("Generated Password:")
             print("\t", password)
             savePassword = inquirer.select(
                         message = "Do you want to save this password for an account?",
@@ -304,9 +342,54 @@ def main():
                 else:
                     add(accountName=accountName, password=password)
 
+        def createUser():
+            print("Creating a User Profile for ease of personalized Password generation...")
+            time.sleep(0.5)
+            print("Proceed below (leave empty for questions you cannot answer): ")
+            userinfo = {}
+            userinfo["firstName"] = input("First Name: ")
+            userinfo["middleName"] = input("Middle Name: ")
+            userinfo["lastName"] = input("Last Name: ")
+            userinfo["partnerName"] = input("Partner's Name (if any): ")
+            userinfo["petName"] = input("Pet's Name (if any): ")
+            userinfo["DOB"] = input("your Date of Birth in DDMMYYY: ")
+            userinfo["day"] = userinfo["DOB"][:2]
+            userinfo["month"] = userinfo["DOB"][2:4]
+            userinfo["year"] = userinfo["DOB"][4:]
+            months = {"": "", "01": "January", "02": "February", "03": "March", "04": "April", "05": "May", "06": "June", "07": "July", "08": "August", "09": "September", "10": "October", "11": "Novmember", "12": "December"}
+            userinfo["monthInWords"] = months[userinfo["month"]]
+            userinfo["favourites"] = input("Favourite (word/adjective/thing/person/etc.): ")
+
+            moreInfo = inquirer.select(
+                        message = "Do you want to add more info in order to better facilitate password generation?",
+                        choices = ["yes", "no"]
+                    ).execute()
+            
+            if moreInfo == "yes":
+                userinfo["Occupation"] = input("Occupation: ")
+                userinfo["Hobby"] = input("Favourite Hobby: ")
+                userinfo["LastMovie"] = input("Last Movie Watched: ")
+                userinfo["LastMovie"] = input("Last Movie Watched: ")
+                userinfo["ex"] = input("Ex's Name: ")
+                userinfo["partnerBday"] = input("Your current parter's Birthday in DDMMYYYY:")
+                userinfo["pday"] = userinfo["DOB"][:2]
+                userinfo["pmonth"] = userinfo["DOB"][2:4]
+                userinfo["pear"] = userinfo["DOB"][4:]
+                userinfo["monthInWords"] = months[userinfo["pmonth"]]
+                userinfo["email"] = input("E-mail: ")
+                userinfo["memory"] = input("Favourite Memory: ")
+                userinfo["annevesary"] = input("Anniversary: ")
+
+            userinfo["misc"] = "catshaha"
+            print(userinfo)
+
+            with open("userinfo.json", "w") as f:
+                json.dump(userinfo, f)
+
+
         n = len(sys.argv)
 
-        arguments = ("help", "-h", "add", "-a", "show", '-s', "remove", "-rm", "keys", "refresh", "-r" "genkeys", "genpass", "-p")
+        arguments = ("help", "-h", "add", "-a", "show", '-s', "remove", "-rm", "keys", "refresh", "-r" "genkeys", "genpass", "-p", "usergen", "-u")
 
         if os.path.isfile("accountinfo.json"):
             with open("accountinfo.json", "r") as f:
@@ -330,4 +413,4 @@ def main():
     except KeyboardInterrupt:
         sys.exit(0)
 
-main()
+# main()
