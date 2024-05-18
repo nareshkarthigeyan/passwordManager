@@ -1,0 +1,166 @@
+[
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "base64",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "base64",
+        "description": "base64",
+        "detail": "base64",
+        "documentation": {}
+    },
+    {
+        "label": "os.path",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os.path",
+        "description": "os.path",
+        "detail": "os.path",
+        "documentation": {}
+    },
+    {
+        "label": "getpass",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "getpass",
+        "description": "getpass",
+        "detail": "getpass",
+        "documentation": {}
+    },
+    {
+        "label": "tabulate",
+        "importPath": "tabulate",
+        "description": "tabulate",
+        "isExtraImport": true,
+        "detail": "tabulate",
+        "documentation": {}
+    },
+    {
+        "label": "tabulate",
+        "importPath": "tabulate",
+        "description": "tabulate",
+        "isExtraImport": true,
+        "detail": "tabulate",
+        "documentation": {}
+    },
+    {
+        "label": "rsa",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "rsa",
+        "description": "rsa",
+        "detail": "rsa",
+        "documentation": {}
+    },
+    {
+        "label": "inquirer",
+        "importPath": "InquirerPy",
+        "description": "InquirerPy",
+        "isExtraImport": true,
+        "detail": "InquirerPy",
+        "documentation": {}
+    },
+    {
+        "label": "inquirer",
+        "importPath": "InquirerPy",
+        "description": "InquirerPy",
+        "isExtraImport": true,
+        "detail": "InquirerPy",
+        "documentation": {}
+    },
+    {
+        "label": "signal",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "signal",
+        "description": "signal",
+        "detail": "signal",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "genpass",
+        "importPath": "genpass",
+        "description": "genpass",
+        "isExtraImport": true,
+        "detail": "genpass",
+        "documentation": {}
+    },
+    {
+        "label": "setup",
+        "importPath": "setuptools",
+        "description": "setuptools",
+        "isExtraImport": true,
+        "detail": "setuptools",
+        "documentation": {}
+    },
+    {
+        "label": "find_packages",
+        "importPath": "setuptools",
+        "description": "setuptools",
+        "isExtraImport": true,
+        "detail": "setuptools",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "build.lib.psgr.main",
+        "description": "build.lib.psgr.main",
+        "peekOfCode": "def main():\n    def generateKeys():\n        (pubkey, privkey) = rsa.newkeys(512)\n        keyData = {\n            \"public_key\": pubkey.save_pkcs1().decode(),\n            \"private_key\": privkey.save_pkcs1().decode()\n        }\n        with open(\"keys.json\", 'w') as f:\n            json.dump(keyData, f)\n    def fetchKeys():",
+        "detail": "build.lib.psgr.main",
+        "documentation": {}
+    },
+    {
+        "label": "genpass",
+        "kind": 2,
+        "importPath": "psgr.genpass",
+        "description": "psgr.genpass",
+        "peekOfCode": "def genpass(length):\n    digits = [x for x in \"0123456789\"]\n    lowercase = [x for x in \"abcdefghijklmnopqrstuvwxyz\"]\n    uppercase = [x for x in \"abcdefghijklmnopqrstuvwxyz\".upper()]\n    special = [x for x in \"!@#$%^&*()_+~|}{:'?><\" +'\"']\n    combinedList = digits + lowercase + uppercase + special\n    password = \"\"\n    for i in range (length):\n        password += random.choice(combinedList)\n    return password",
+        "detail": "psgr.genpass",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "psgr.main",
+        "description": "psgr.main",
+        "peekOfCode": "def main():\n    def generateKeys():\n        (pubkey, privkey) = rsa.newkeys(512)\n        keyData = {\n            \"public_key\": pubkey.save_pkcs1().decode(),\n            \"private_key\": privkey.save_pkcs1().decode()\n        }\n        with open(\"keys.json\", 'w') as f:\n            json.dump(keyData, f)\n    def fetchKeys():",
+        "detail": "psgr.main",
+        "documentation": {}
+    }
+]

@@ -9,7 +9,7 @@ import json
 import rsa
 from InquirerPy import inquirer
 import signal
-
+from genpass import genpass
 
 
 def main():
@@ -89,6 +89,8 @@ def main():
             print(pub, priv)
         elif command == "genkeys":
             generateKeys()
+        elif command == "genpass":
+            passwordGen()
 
         return
 
@@ -163,27 +165,28 @@ def main():
                 print(table)
                 print(" ")
 
-        def ignore_ctrl_c(signum, frame):
-            if os.name == 'nt':
-                _ = os.system('cls')
-            # For UNIX-like systems (Linux, macOS)
-            else:
-                _ = os.system('clear')
+            tableLines = table.count("\n") + 2
 
+        def ignore_ctrl_c(signum, frame):
+            print("                             ", end="\r")
+            for i in range(tableLines):
+                print("\033[F", end="")  # Move cursor up one line
+                print("\033[K", end="")
             sys.exit(0)
         
         original_handler = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, ignore_ctrl_c)
-        for i in range(5, 0, -1):
+        for i in range(7, 0, -1):
             print(f"clearing screen in {i} seconds.", end="\r")
             time.sleep(1)
+        print("                             ", end="\r")
         signal.signal(signal.SIGINT, original_handler)
-        if os.name == 'nt':
-            _ = os.system('cls')
-        # For UNIX-like systems (Linux, macOS)
-        else:
-            _ = os.system('clear')
-        return
+        
+        for i in range(tableLines):
+            print("\033[F", end="")  # Move cursor up one line
+            print("\033[K", end="")
+        
+        sys.exit(0)
 
     def help():
         help_message = """
@@ -238,11 +241,35 @@ def main():
                 with open("accountinfo.json", "w") as f:
                     json.dump(accounts, f)            
         return
+    
+    def passwordGen():
+        length = inquirer.select(
+                    message = "Choose Length of Password to be generated:",
+                    choices = [12, 16, 24]
+                ).execute()
+        password = genpass(length=length)
+        print(password)
+        savePassword = inquirer.select(
+                    message = "Do you want to save this password for an account?",
+                    choices = ["yes", "no"]
+                ).execute()
+        if savePassword == "yes":
+            chooseIt = ["Create a New Account"]
+            for k, v in accounts.items():
+                chooseIt.append(k)
+            accountName = inquirer.select(
+                message = "Choose the account:",
+                choices = chooseIt
+            ).execute()
 
+            if accountName == "Create a New Account":
+                add(password=password)
+            else:
+                add(accountName=accountName, password=password)
 
     n = len(sys.argv)
 
-    arguments = ("help", "add", "show", "remove", "keys", "refresh", "genkeys")
+    arguments = ("help", "add", "show", "remove", "keys", "refresh", "genkeys", "genpass")
 
     if os.path.isfile("accountinfo.json"):
         with open("accountinfo.json", "r") as f:
