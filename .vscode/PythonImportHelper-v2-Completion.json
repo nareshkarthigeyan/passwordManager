@@ -18,6 +18,15 @@
         "documentation": {}
     },
     {
+        "label": "pprint",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pprint",
+        "description": "pprint",
+        "detail": "pprint",
+        "documentation": {}
+    },
+    {
         "label": "sys",
         "kind": 6,
         "isExtraImport": true,
@@ -142,7 +151,7 @@
         "kind": 2,
         "importPath": "build.lib.psgr.main",
         "description": "build.lib.psgr.main",
-        "peekOfCode": "def main():\n    def generateKeys():\n        (pubkey, privkey) = rsa.newkeys(512)\n        keyData = {\n            \"public_key\": pubkey.save_pkcs1().decode(),\n            \"private_key\": privkey.save_pkcs1().decode()\n        }\n        with open(\"keys.json\", 'w') as f:\n            json.dump(keyData, f)\n    def fetchKeys():",
+        "peekOfCode": "def main():\n    try:\n        def generateKeys():\n            (pubkey, privkey) = rsa.newkeys(512)\n            keyData = {\n                \"public_key\": pubkey.save_pkcs1().decode(),\n                \"private_key\": privkey.save_pkcs1().decode()\n            }\n            with open(\"keys.json\", 'w') as f:\n                json.dump(keyData, f)",
         "detail": "build.lib.psgr.main",
         "documentation": {}
     },

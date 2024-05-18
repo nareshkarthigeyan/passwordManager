@@ -1,4 +1,5 @@
 import json
+import pprint
 import random
 import sys
 import time
@@ -91,8 +92,10 @@ def main():
                 generateKeys()
             elif command in ["genpass", "-p"]:
                 passwordGen()
-            elif command in ["usergen", "-u"]:
+            elif command in ["usergen", "-cu"]:
                 createUser()
+            elif command in ["user", "-u"]:
+                showUser()
 
             return
 
@@ -285,13 +288,13 @@ def main():
                         userinfo = [x for x in userinfoRaw if x != ""]
                         random.shuffle(userinfo)
                     ran = random.choice(userinfo).replace(" ", "")
-                    print(ran)
+
                     randomIndex = random.randint(len(ran)//3, len(ran))
                     ran2 = random.choice([ran[:randomIndex], ran[randomIndex:]])
-                    print(ran2)
+
                     for i in ran2:
                         userSpecific += random.choice([i.upper(), i.lower()])
-                    print(userSpecific)
+
                 except FileNotFoundError:
                     answer = inquirer.select(
                         message = "No user data detected. Add user data now?",
@@ -314,12 +317,12 @@ def main():
         
         def passwordGen():
             type = inquirer.select(
-                        message = "Do you want to personalize your Password with your info?",
+                        message = "Do you want to personalize your Password with your info? (may not always work)",
                         choices = ["yes", "no"]
                     ).execute()
             length = inquirer.select(
                         message = "Choose desired characted length of the Password:",
-                        choices = [8, 16, 24]
+                        choices = [12, 16, 24]
                     ).execute()
             password = genpass(length=length, personalized=type)
             print("Generated Password:")
@@ -352,7 +355,7 @@ def main():
             userinfo["lastName"] = input("Last Name: ")
             userinfo["partnerName"] = input("Partner's Name (if any): ")
             userinfo["petName"] = input("Pet's Name (if any): ")
-            userinfo["DOB"] = input("your Date of Birth in DDMMYYY: ")
+            userinfo["DOB"] = input("Your Date of Birth in DDMMYYY: ")
             userinfo["day"] = userinfo["DOB"][:2]
             userinfo["month"] = userinfo["DOB"][2:4]
             userinfo["year"] = userinfo["DOB"][4:]
@@ -367,11 +370,18 @@ def main():
             
             if moreInfo == "yes":
                 userinfo["Occupation"] = input("Occupation: ")
+                userinfo["workplace"] = input("Place of Work: ")
+                userinfo["School"] = input("School Name: ")
+                userinfo["Childhool Crush"] = input("Childhood Crush: ")
+                userinfo["Room Number"] = input("Room Number: ")
+                userinfo["Book"] = input("Favourite Book: ")
+                userinfo["celebrity crush"] = input("Celebrity Crush: ")
+                userinfo["color"] = input("Favourite color: ")
                 userinfo["Hobby"] = input("Favourite Hobby: ")
                 userinfo["LastMovie"] = input("Last Movie Watched: ")
-                userinfo["LastMovie"] = input("Last Movie Watched: ")
+                userinfo["favMovie"] = input("Favourite Movie Watched: ")
                 userinfo["ex"] = input("Ex's Name: ")
-                userinfo["partnerBday"] = input("Your current parter's Birthday in DDMMYYYY:")
+                userinfo["partnerBday"] = input("Your current parter's Birthday in DDMMYYYY: ")
                 userinfo["pday"] = userinfo["DOB"][:2]
                 userinfo["pmonth"] = userinfo["DOB"][2:4]
                 userinfo["pear"] = userinfo["DOB"][4:]
@@ -380,16 +390,24 @@ def main():
                 userinfo["memory"] = input("Favourite Memory: ")
                 userinfo["annevesary"] = input("Anniversary: ")
 
-            userinfo["misc"] = "catshaha"
-            print(userinfo)
+
+            userinfo["misc"] = "."
 
             with open("userinfo.json", "w") as f:
                 json.dump(userinfo, f)
 
+        def showUser():
+            try:
+                with open("userinfo.json") as f:
+                    userinfo = json.load(f)
+                    pprint.pprint(userinfo)
+            except FileNotFoundError:
+                print("No user info found. Create one using the command 'usergen' or '-cu'")
+                sys.exit(0)
 
         n = len(sys.argv)
 
-        arguments = ("help", "-h", "add", "-a", "show", '-s', "remove", "-rm", "keys", "refresh", "-r" "genkeys", "genpass", "-p", "usergen", "-u")
+        arguments = ("help", "-h", "add", "-a", "show", '-s', "remove", "-rm", "keys", "refresh", "-r" "genkeys", "genpass", "-p", "usergen", "-cu", "user", '-u')
 
         if os.path.isfile("accountinfo.json"):
             with open("accountinfo.json", "r") as f:
