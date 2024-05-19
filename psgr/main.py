@@ -250,10 +250,10 @@ def main():
 
         def remove(alll=""):
             message = inquirer.select(
-                        message = "Choose Account:",
-                        choices = ['Y', 'N']
+                        message = "This process is irreversible. Continue?",
+                        choices = ['yes', 'no']
                     ).execute()
-            if message.upper() == "Y":
+            if message == "yes":
                 if alll == "all":
                     with open("accountinfo.json", 'w') as json_file:
                         # Write an empty JSON object to the file
@@ -270,52 +270,67 @@ def main():
                 if alll in accounts:
                     accounts.pop(alll)
                     with open("accountinfo.json", "w") as f:
-                        json.dump(accounts, f)            
+                        json.dump(accounts, f)
+                    print(f"Succesfully removed{alll}")            
             return
         
-        def genpass(length, personalized):
+        def genpass(length, personalized, frequency):
             digits = "0123456789"
             lowercase = "abcdefghijklmnopqrstuvwxyz"
             uppercase = "abcdefghijklmnopqrstuvwxyz".upper()
             special = "!@#$%^&*()_+~|}{:'?><" +'"'
             combinedList = list(digits + lowercase + uppercase + special)
-            userSpecific = ""
-            if personalized == "yes":
-                try: 
-                    with open("userinfo.json") as f:
-                        userinfoDic = json.load(f)
-                        userinfoRaw = list(userinfoDic.values())
-                        userinfo = [x for x in userinfoRaw if x != ""]
-                        random.shuffle(userinfo)
-                    ran = random.choice(userinfo).replace(" ", "")
+            passwordsFinal = []
+            for i in range(frequency):
+                userSpecific = ""
+                userSpecific2 = ""
+                if personalized == "yes":
+                    try: 
+                        with open("userinfo.json") as f:
+                            userinfoDic = json.load(f)
+                            userinfoRaw = list(userinfoDic.values())
+                            userinfo = [x for x in userinfoRaw if x != ""]
+                            random.shuffle(userinfo)
+                        ran = random.choice(userinfo).replace(" ", "")
 
-                    randomIndex = random.randint(len(ran)//3, len(ran))
-                    ran2 = random.choice([ran[:randomIndex], ran[randomIndex:]])
+                        if len(ran) < length - 6:
+                            randomIndex = random.randint(len(ran)//3, len(ran))
+                        else:
+                            ran = random.choice([ran[length:], ran[:length]])
+                            randomIndex = random.randint(len(ran)//3, len(ran))
 
-                    for i in ran2:
-                        userSpecific += random.choice([i.upper(), i.lower()])
+                        for i in ran[:randomIndex]:
+                            userSpecific += random.choice([i.upper(), i.lower()])
+                        for i in ran[randomIndex:]:
+                            userSpecific2 += random.choice([i.upper(), i.lower()])
 
-                except FileNotFoundError:
-                    answer = inquirer.select(
-                        message = "No user data detected. Add user data now?",
-                        choices = ["yes", "no"]
-                    ).execute() 
-                    if answer == "yes":
-                        createUser()
-                        print("User info created successfully. Run the command again to generate a personalized password.")
-                        sys.exit(0)
-                    elif answer == "no":
-                        userSpecific = ""
+                    except FileNotFoundError:
+                        answer = inquirer.select(
+                            message = "No user data detected. Add user data now?",
+                            choices = ["yes", "no"]
+                        ).execute() 
+                        if answer == "yes":
+                            createUser()
+                            print("User info created successfully. Run the command again to generate a personalized password.")
+                            sys.exit(0)
+                        elif answer == "no":
+                            userSpecific = ""
+                            userSpecific2 = ""
 
-            passwordList = [random.choice(uppercase)] + [random.choice(lowercase)] + [random.choice(special)] + [random.choice(digits)] + [userSpecific]
-            lengthDone = len("".join(passwordList))
-            for i in range (length - lengthDone):
-                passwordList.append(random.choice(combinedList))
-            random.shuffle(passwordList)
-            password = "".join(passwordList)
-            return password
+                passwordList = [random.choice(uppercase)] + [random.choice(lowercase)] + [random.choice(special)] + [random.choice(digits)] + [userSpecific] + [userSpecific2]
+                lengthDone = len("".join(passwordList))
+                for i in range (length - lengthDone):
+                    passwordList.append(random.choice(combinedList))
+                random.shuffle(passwordList)
+                password = "".join(passwordList)
+                passwordsFinal.append(password[0:length])
+            return passwordsFinal
         
         def passwordGen():
+            frequency = type = inquirer.select(
+                        message = "Number of Passwords you want to generate: ",
+                        choices = [1, 2, 4, 8, 12, 16]
+                    ).execute()
             type = inquirer.select(
                         message = "Do you want to personalize your Password with your info? (may not always work)",
                         choices = ["yes", "no"]
@@ -324,14 +339,21 @@ def main():
                         message = "Choose desired characted length of the Password:",
                         choices = [12, 16, 24]
                     ).execute()
-            password = genpass(length=length, personalized=type)
-            print("Generated Password:")
-            print("\t", password)
+            passwordsList = genpass(length=length, personalized=type, frequency=frequency)
+            print("Generated Password(s):")
+            for passes in passwordsList:
+                print("\t", passes)
             savePassword = inquirer.select(
-                        message = "Do you want to save this password for an account?",
+                        message = "Do you want to save any one of these passwords for an account?",
                         choices = ["yes", "no"]
                     ).execute()
+            
             if savePassword == "yes":
+                choosePassword = inquirer.select(
+                            message = "Choose one of the generated passwords: ",
+                            choices = passwordsList
+                        ).execute()
+                print("\t", choosePassword)
                 chooseIt = ["Create a New Account"]
                 for k, v in accounts.items():
                     chooseIt.append(k)
@@ -341,9 +363,9 @@ def main():
                 ).execute()
 
                 if accountName == "Create a New Account":
-                    add(password=password)
+                    add(password=choosePassword)
                 else:
-                    add(accountName=accountName, password=password)
+                    add(accountName=accountName, password=choosePassword)
 
         def createUser():
             print("Creating a User Profile for ease of personalized Password generation...")
@@ -418,7 +440,8 @@ def main():
         appname = "passman"
 
         if n < 2:
-            print(f"Usage: {appname} command. Use {appname} help for more info.")
+            help()
+            print(f"Usage: {appname} command.")
         elif sys.argv[1] not in arguments:
             print("No use for the command {", sys.argv[1], "} found. Try using appname.py help.")
 
@@ -432,3 +455,5 @@ def main():
         sys.exit(0)
 
 # main()
+if __name__ == "__main__":
+    main()
