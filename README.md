@@ -1,11 +1,3 @@
-Metadata-Version: 2.1
-Name: psgr
-Version: 0.2.2
-Summary: A password manager application
-Author: Naresh Karthigeyan
-Author-email: nareskarthigeyan.2005@gmail.com
-Description-Content-Type: text/markdown
-
 # PSGR - Password Manager
 
 PSGR is a command-line based password manager that helps you manage and store your account credentials securely using RSA encryption. The passwords are stored locally in a JSON file that is encrypted. It provides functionalities for adding, viewing, removing, and generating passwords, along with user information management for personalized password generation.

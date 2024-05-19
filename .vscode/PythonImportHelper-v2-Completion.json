@@ -138,6 +138,15 @@
         "documentation": {}
     },
     {
+        "label": "pathlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
         "label": "genpass",
         "kind": 2,
         "importPath": "build.lib.psgr.genpass",
@@ -162,6 +171,24 @@
         "description": "psgr.main",
         "peekOfCode": "def main():\n    try:\n        def generateKeys():\n            (pubkey, privkey) = rsa.newkeys(512)\n            keyData = {\n                \"public_key\": pubkey.save_pkcs1().decode(),\n                \"private_key\": privkey.save_pkcs1().decode()\n            }\n            with open(\"keys.json\", 'w') as f:\n                json.dump(keyData, f)",
         "detail": "psgr.main",
+        "documentation": {}
+    },
+    {
+        "label": "HERE",
+        "kind": 5,
+        "importPath": "setup",
+        "description": "setup",
+        "peekOfCode": "HERE = pathlib.Path(__file__).parent\n# The text of the README file\nREADME = (HERE / \"README.md\").read_text()\nsetup(\n    name='psgr',\n    version='0.2.2',\n    description='A password manager application',\n    long_description=README,\n    long_description_content_type='text/markdown',\n    author='Naresh Karthigeyan',",
+        "detail": "setup",
+        "documentation": {}
+    },
+    {
+        "label": "README",
+        "kind": 5,
+        "importPath": "setup",
+        "description": "setup",
+        "peekOfCode": "README = (HERE / \"README.md\").read_text()\nsetup(\n    name='psgr',\n    version='0.2.2',\n    description='A password manager application',\n    long_description=README,\n    long_description_content_type='text/markdown',\n    author='Naresh Karthigeyan',\n    author_email='nareskarthigeyan.2005@gmail.com',\n    packages=find_packages(),",
+        "detail": "setup",
         "documentation": {}
     }
 ]
